@@ -1,0 +1,96 @@
+Pratica 1 - Cifrado:
+cd ~
+sudo update
+sudo apt install gnupg2-y
+mkdir ~/prueba
+ls
+cd ~/prueba
+ls -a
+sudo nano Gabriel.txt
+Nombre: Gabriel Ramirez
+Matricula: 2025-1352
+Asignatura: SO3
+cat Gabriel.txt
+sudo gpg2 --symmetric ~/prueba/Gabriel.txt
+ls
+cat Gabriel.txt.gpg
+cat Gabriel.txt
+rm Gabriel.txt
+ls
+sudo gpg2 --decrypt ~/prueba/Gabriel.txt.gpg
+cat Gabriel.txt.gpg
+sudo gpg2 --output ~/prueba/Gabriel.txt.gpg --decrypt ~/prueba/Gabriel.txt.gpg
+cat Gabriel.txt.gpg
+
+Pratica 2 - IP tables - UFW/Firewall-cmd.
+sudo apt install vsftpd -y
+sudo apt install ufw -y
+sudo systemctl status vsftpd
+sudo  systemctl start vsftpd
+sudo  systemctl enable vsftpd
+sudo systemctl status vsftpd
+sudo iptables -L
+sudo iptables -A INPUT -p tcp  --dport 80 -j REJECT
+sudo iptables -A INPUT -p tcp  --dport 22 -j REJECT
+sudo iptables -A INPUT -p tcp  --dport 21 -j REJECT
+sudo iptables -A OUTPUT -p tcp --sport 80 -j REJECT
+sudo iptables -A OUTPUT -p tcp --sport 22 -j REJECT
+sudo iptables -A OUTPUT -p tcp --sport 21 -j REJECT
+sudo iptables -L
+sudo iptables -D INPUT-p tcp --sport 80 -j REJECT
+sudo iptables -D INPUT -p tcp --sport 22 -j REJECT
+sudo iptables -D INPUT -p tcp --sport 21 -j REJECT
+sudo systemctl status ufw
+sudo  systemctl enable ufw
+sudo systemctl status verbose
+sudo systemctl status ufw
+sudo ufw deny 80/tcp
+sudo ufw deny 22/tcp
+sudo ufw deny 21/tcp
+sudo ufw status numbered
+sudo iptables -L
+sudo ufw allow 80/tcp
+sudo ufw allow 22/tcp
+sudo ufw allow 21/tcp
+sudo ufw status numbered
+
+Pratica 3-Instalando IDS snort.
+sudo apt update
+sudo apt install snort -y
+sudo nano /etc/snort/rules/local.rules
+alert icmp any any -> 192.168.10.129 any (msg:"Trafico ICMP 192.168.10.129 detectado"; sid:1000001; rev:1;)
+alert tcp any any -> 192.168.10.129 21 (msg:"Trafico hacia puerto 21/tcp (FTP) detectado"; sid:1000002; rev:1;)
+alert tcp any any -> 192.168.10.129 22 (msg:"Trafico hacia puerto 22/tcp (SSH) detectado"; sid:1000003; rev:1;)
+alert tcp any any -> 192.168.10.129 80 (msg:"Trafico hacia puerto 80/tcp (HTTP) detectado"; sid:1000004; rev:1;)
+sudo snort -A console -c /etc/snort/snort.conf -i eth0
+ping 192.168.10.129
+telnet 192.168.10.129 21
+telnet 192.168.10.129 22
+telnet 192.168.10.129 80
+
+Pratica 4 - Configurar 2FA con google authenticator.
+sudo apt update
+sudo apt install libpam-google-authenticator -y
+sudo apt install qrencode -y
+su - kali
+google-authenticator
+sudo nano /etc/pam.d/sshd
+auth required pam_google_authenticator.so
+sudo nano /etc/ssh/sshd_config
+Script:
+# Habilitar autenticación por contraseña
+PasswordAuthentication yes
+
+# Habilitar autenticación de desafío (para 2FA)
+ChallengeResponseAuthentication yes
+
+# Especificacion de los métodos de autenticación, agregar google-authenticator
+AuthenticationMethods publickey,password publickey,keyboard-interactive
+
+# 2FA para todos los usuarios:
+AuthenticationMethods publickey,keyboard-interactive password,keyboard-interactive
+
+# UsePAM esté activado
+UsePAM yes
+sudo systemctl restart ssh
+sudo systemctl status ssh
