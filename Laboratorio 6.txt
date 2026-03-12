@@ -1,79 +1,236 @@
-Pratica 1 - Cifrado:
-cd ~
-sudo update
-sudo apt install gnupg2-y
-mkdir ~/prueba
-ls
-cd ~/prueba
-ls -a
-sudo nano Gabriel.txt
-Nombre: Gabriel Ramirez
-Matricula: 2025-1352
-Asignatura: SO3
-cat Gabriel.txt
-sudo gpg2 --symmetric ~/prueba/Gabriel.txt
-ls
-cat Gabriel.txt.gpg
-cat Gabriel.txt
-rm Gabriel.txt
-ls
-sudo gpg2 --decrypt ~/prueba/Gabriel.txt.gpg
-cat Gabriel.txt.gpg
-sudo gpg2 --output ~/prueba/Gabriel.txt.gpg --decrypt ~/prueba/Gabriel.txt.gpg
-cat Gabriel.txt.gpg
+Practica 1 - Cifrado.
+Instalar la herramienta GPG2:
+sudo apt update
+sudo apt install gnupg2 -y
+gpg2 --version
 
-Pratica 2 - IP tables - UFW/Firewall-cmd.
-sudo apt install vsftpd -y
-sudo apt install ufw -y
+Crear un directorio:
+mkdir ~/Desktop/practica_cifrado
+cd ~/Desktop/practica_cifrado
+
+Crear un archivo dentro del directorio:
+nano mensaje.txt
+Nombre = Gabriel Ramirez
+Matricula = 2025-1352
+Materia = SO3
+
+Verificamos el archivo:
+cat mensaje.txt
+
+Cifrar el archivo con GPG2:
+gpg2 -c mensaje.txt
+ls
+
+Intentar acceder al archivo cifrado:
+cat mensaje.txt.gpg
+
+Eliminar el archivo original:
+rm mensaje.txt
+
+Descifrar el archivo:
+gpg2 mensaje.txt.gpg
+
+Mostrar el contenido del archivo descifrado:
+cat mensaje.txt
+
+Practica 2 - IP tables - UFW/Firewall-cmd .
+Instalar los servicios HTTP, FTP y SSH:
+sudo apt update
+sudo apt install apache2 vsftpd openssh-server -y
+
+Iniciar los servicios:
+sudo systemctl start apache2
+sudo systemctl start vsftpd
+sudo systemctl start ssh
+
+Habilitarlos:
+sudo systemctl enable apache2
+sudo systemctl enable vsftpd
+sudo systemctl enable ssh
+
+Verificar que los servicios están funcionando:
+sudo systemctl status apache2
 sudo systemctl status vsftpd
-sudo  systemctl start vsftpd
-sudo  systemctl enable vsftpd
-sudo systemctl status vsftpd
+sudo systemctl status ssh
+
+Verificar los puertos abiertos:
+sudo ss -tulnp
+
+Probar los servicios:
+Probar HTTP:
+http://192.168.140.129
+
+Probar FTP:
+ftp 192.168.140.129
+
+Probar SSH:
+ssh oem@192.168.140.129
+
+Bloquear los puertos usando IPTABLES:
+sudo iptables -A INPUT -p tcp --dport 80 -j DROP
+sudo iptables -A INPUT -p tcp --dport 21 -j DROP
+sudo iptables -A INPUT -p tcp --dport 22 -j DROP
+
+Ver reglas:
 sudo iptables -L
-sudo iptables -A INPUT -p tcp  --dport 80 -j REJECT
-sudo iptables -A INPUT -p tcp  --dport 22 -j REJECT
-sudo iptables -A INPUT -p tcp  --dport 21 -j REJECT
-sudo iptables -A OUTPUT -p tcp --sport 80 -j REJECT
-sudo iptables -A OUTPUT -p tcp --sport 22 -j REJECT
-sudo iptables -A OUTPUT -p tcp --sport 21 -j REJECT
+
+Probar otra vez:
+http://192.168.140.129
+ssh oem@192.168.140.129
+ftp 192.168.140.129
+
+Habilitar nuevamente los puertos con IPTABLES:
+sudo iptables -D INPUT -p tcp --dport 80 -j DROP
+sudo iptables -D INPUT -p tcp --dport 21 -j DROP
+sudo iptables -D INPUT -p tcp --dport 22 -j DROP
+
+Verificamos:
 sudo iptables -L
-sudo iptables -D INPUT-p tcp --sport 80 -j REJECT
-sudo iptables -D INPUT -p tcp --sport 22 -j REJECT
-sudo iptables -D INPUT -p tcp --sport 21 -j REJECT
-sudo systemctl status ufw
-sudo  systemctl enable ufw
-sudo systemctl status verbose
-sudo systemctl status ufw
-sudo ufw deny 80/tcp
-sudo ufw deny 22/tcp
-sudo ufw deny 21/tcp
-sudo ufw status numbered
-sudo iptables -L
-sudo ufw allow 80/tcp
-sudo ufw allow 22/tcp
-sudo ufw allow 21/tcp
+
+Probar otra vez:
+http://192.168.140.129
+ftp 192.168.140.129
+ssh oem@192.168.140.129
+
+Bloquear puertos usando UFW:
+habilitamos UFW.
+sudo ufw enable
+
+Ver estado:
+sudo ufw status
+
+Bloquear puertos:
+sudo ufw deny 80
+sudo ufw deny 21
+sudo ufw deny 22
+
+Ver reglas:
 sudo ufw status numbered
 
-Pratica 3-Instalando IDS snort.
+Probar otra vez:
+http://192.168.140.129
+ftp 192.168.140.129
+ssh oem@192.168.140.129
+
+Permitir nuevamente los puertos:
+sudo ufw allow 80
+sudo ufw allow 21
+sudo ufw allow 22
+
+Ver estado:
+sudo ufw status
+
+Practica 3 - Instalacion de IDS snort.
+Instalar Snort:
 sudo apt update
 sudo apt install snort -y
-sudo nano /etc/snort/rules/local.rules
-alert icmp any any -> 192.168.10.129 any (msg:"Trafico ICMP 192.168.10.129 detectado"; sid:1000001; rev:1;)
-alert tcp any any -> 192.168.10.129 21 (msg:"Trafico hacia puerto 21/tcp (FTP) detectado"; sid:1000002; rev:1;)
-alert tcp any any -> 192.168.10.129 22 (msg:"Trafico hacia puerto 22/tcp (SSH) detectado"; sid:1000003; rev:1;)
-alert tcp any any -> 192.168.10.129 80 (msg:"Trafico hacia puerto 80/tcp (HTTP) detectado"; sid:1000004; rev:1;)
-sudo snort -A console -c /etc/snort/snort.conf -i eth0
-ping 192.168.10.129
-telnet 192.168.10.129 21
-telnet 192.168.10.129 22
-telnet 192.168.10.129 80
 
-Pratica 4 - Configurar 2FA con google authenticator.
+Verificar que Snort está instalado:
+snort -V
+
+Editar el archivo de reglas de Snort:
+sudo nano /etc/snort/rules/local.rules
+
+Crear las reglas de detección:
+alert icmp any any -> $HOME_NET any (msg:"ICMP Ping Detectado"; sid:1000001; rev:1;)
+
+alert tcp any any -> $HOME_NET 21 (msg:"Acceso FTP Detectado"; sid:1000002; rev:1;)
+
+alert tcp any any -> $HOME_NET 22 (msg:"Acceso SSH Detectado"; sid:1000003; rev:1;)
+
+alert tcp any any -> $HOME_NET 80 (msg:"Acceso HTTP Detectado"; sid:1000004; rev:1;)
+
+Verificar que Snort cargue las reglas:
+sudo snort -T -c /etc/snort/snort.conf
+
+Ejecutar Snort en modo detección:
+sudo snort -A console -q -c /etc/snort/snort.conf -i ens33
+
+Probar:
+http://192.168.140.129
+ftp 192.168.140.129
+ssh oem@192.168.140.129
+ping 192.168.140.129
+
+Practica 4 - Configurar 2FA con google authenticator Modulo PAM para Acceso SSH.
+Instalar Google Authenticator.
 sudo apt update
 sudo apt install libpam-google-authenticator -y
-sudo apt install qrencode -y
-su - kali
+
+Configurar Google Authenticator para tu usuario.
 google-authenticator
+Do you want authentication tokens to be time-based? (y/n) y
+Luego aparecerá:
+Código QR
+
+Clave secreta
+Códigos de emergencia
+
+Abre la aplicación:
+Google Authenticator en tu celular.
+
+Responde las demás preguntas así:
+Your new secret key is: LA6RY5MGTH46KDVQQBITNGH5GA
+Enter code from app (-1 to skip): 258896
+Code confirmed
+Your emergency scratch codes are:
+  36345945
+  20497197
+  44483007
+  21808860
+  15901249
+
+Do you want me to update your "/home/oem/.google_authenticator" file? (y/n) y
+
+Do you want to disallow multiple uses of the same authentication
+token? This restricts you to one login about every 30s, but it increases
+your chances to notice or even prevent man-in-the-middle attacks (y/n) y
+
+By default, a new token is generated every 30 seconds by the mobile app.
+In order to compensate for possible time-skew between the client and the server,
+we allow an extra token before and after the current time. This allows for a
+time skew of up to 30 seconds between authentication server and client. If you
+experience problems with poor time synchronization, you can increase the window
+from its default size of 3 permitted codes (one previous code, the current
+code, the next code) to 17 permitted codes (the 8 previous codes, the current
+code, and the 8 next codes). This will permit for a time skew of up to 4 minutes
+between client and server.
+Do you want to do so? (y/n) n
+
+If the computer that you are logging into isn't hardened against brute-force
+login attempts, you can enable rate-limiting for the authentication module.
+By default, this limits attackers to no more than 3 login attempts every 30s.
+Do you want to enable rate-limiting? (y/n) y
+
+Se creará el archivo:
+~/.google_authenticator
+
+Verificar:
+cat ~/.google_authenticator
+
+Configurar PAM para usar Google Authenticator.
+Edita el archivo PAM de SSH:
+sudo nano /etc/pam.d/sshd
+
+Agrega esta línea al final del archivo.
+auth required pam_google_authenticator.so
+
+Configurar SSH para pedir 2FA.
+sudo nano /etc/ssh/sshd_config
+UsePAM yes
+ChallengeResponseAuthentication yes
+PasswordAuthentication yes
+bdInteractiveAuthentication yes
+
+Reiniciar el servicio SSH.
+sudo systemctl restart ssh
+
+Verifica que esté activo:
+sudo systemctl status ssh
+
+Probar conexión desde tu máquina HOST.
+Desde tu máquina host ejecuta:
+ssh oem@192.168.140.130
 sudo nano /etc/pam.d/sshd
 auth required pam_google_authenticator.so
 sudo nano /etc/ssh/sshd_config
