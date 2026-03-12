@@ -33,7 +33,7 @@ gpg2 mensaje.txt.gpg
 Mostrar el contenido del archivo descifrado:
 cat mensaje.txt
 
-Practica 2 - IP tables - UFW/Firewall-cmd .
+Practica 2 - IP tables - UFW/Firewall-cmd.
 Instalar los servicios HTTP, FTP y SSH:
 sudo apt update
 sudo apt install apache2 vsftpd openssh-server -y
