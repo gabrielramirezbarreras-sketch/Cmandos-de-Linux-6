@@ -231,23 +231,3 @@ sudo systemctl status ssh
 Probar conexión desde tu máquina HOST.
 Desde tu máquina host ejecuta:
 ssh oem@192.168.140.130
-sudo nano /etc/pam.d/sshd
-auth required pam_google_authenticator.so
-sudo nano /etc/ssh/sshd_config
-Script:
-# Habilitar autenticación por contraseña
-PasswordAuthentication yes
-
-# Habilitar autenticación de desafío (para 2FA)
-ChallengeResponseAuthentication yes
-
-# Especificacion de los métodos de autenticación, agregar google-authenticator
-AuthenticationMethods publickey,password publickey,keyboard-interactive
-
-# 2FA para todos los usuarios:
-AuthenticationMethods publickey,keyboard-interactive password,keyboard-interactive
-
-# UsePAM esté activado
-UsePAM yes
-sudo systemctl restart ssh
-sudo systemctl status ssh
